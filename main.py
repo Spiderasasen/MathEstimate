@@ -1,3 +1,9 @@
+#consents
+
+#for claude
+EXCHANGES_PER_MINUTE = 1   # typical; use 2 for fast chatting
+INTRO_OUTRO = 2
+
 # claude code
 def claudeMath(n: int, worst_case: bool = False) -> float:
     """Total cost in USD of a chat with n messages (Opus 5.5 pricing)."""
@@ -19,11 +25,12 @@ def claudeMath(n: int, worst_case: bool = False) -> float:
 #main function of seeing which ai math equation are we going to use
 def which_model(model: str) -> float | None:
     try:
-        amount_of_messages: int = int(input("How many minutes of conversation are you thinking to have?\n"))
-        amount_of_messages *= 2
-        print(f"amount of messages per minute: {amount_of_messages}")
-        amount_of_messages += 2
-        print(f"amount of messages including the intro and outro messages: {amount_of_messages}")
+        minutes = float(input("How many minutes of conversation?\n"))
+        if minutes <= 0:
+            raise ValueError("Minutes must be positive")
+
+        amount_of_messages = round(minutes * EXCHANGES_PER_MINUTE) + INTRO_OUTRO
+        print(f"Estimated API calls (including intro and outro): {amount_of_messages}")
 
         if model == "c":
             return claudeMath(amount_of_messages)
