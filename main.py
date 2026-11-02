@@ -34,22 +34,36 @@ def grokMath(x: int, s: int = 300, w: int = 20, u: int = 40, c: int = 100) -> fl
 #main function of seeing which ai math equation are we going to use
 def which_model(model: str) -> float | None:
     try:
+        students = int(input("How many students?\n"))
+        if students < 1:
+            raise ValueError("Need at least 1 student")
+
         if model == "c":
-            minutes = float(input("How many minutes of conversation?\n"))
+            minutes = float(input("How many minutes of conversation each?\n"))
             if minutes <= 0:
                 raise ValueError("Minutes must be positive")
 
             amount_of_messages = round(minutes * EXCHANGES_PER_MINUTE) + INTRO_OUTRO
-            print(f"Estimated API calls (including intro and outro): {amount_of_messages}")
-            return claudeMath(amount_of_messages)
+            print(f"Estimated API calls per student (including intro and outro): {amount_of_messages}")
+            per_student = claudeMath(amount_of_messages)
 
         elif model == "g":
-            x = int(input("How many wrong attempts before the correct one?\n"))
+            x = int(input("How many wrong attempts per round?\n"))
             if x < 0:
                 raise ValueError("Wrong attempts can't be negative")
 
-            print(f"Estimated API calls: {x + 3}")
-            return grokMath(x)
+            rounds = int(input("How many rounds per student?\n"))
+            if rounds < 1:
+                raise ValueError("Need at least 1 round")
+
+            print(f"Estimated API calls per student: {(x + 3) * rounds}")
+            per_student = grokMath(x) * rounds
+
+        else:
+            return None
+
+        print(f"Per student: ${per_student:.4f}")
+        return per_student * students
 
     except ValueError as e:
         print(f"Invalid input: {e}")
@@ -66,12 +80,14 @@ def main():
             match choice:
                 case 1:
                     print("Claude")
-                    cost = which_model("c")
-                    if cost is not None:
-                        print(f"Estimated cost: ${cost:.4f}")
+                    total = which_model("c")
+                    if total is not None:
+                        print(f"Total estimated cost: ${total:.4f}")
                 case 2:
                     print("Grok")
-                    print(which_model("g"))
+                    total = which_model("g")
+                    if total is not None:
+                        print(f"Total estimated cost: ${total:.4f}")
                 case 3:
                     break
                 case _:
